@@ -1,0 +1,225 @@
+###############################################
+# CONFIG
+###############################################
+import glob
+import os
+
+KNOWN = "data/medusozoan_catalogue.csv"
+TSA_DB = "data/tsa_dbs/combined_tsa_nucl_db"
+HCOL_DB = "data/hcol_db/total_hcol_db"
+HCOL_FASTAS = sorted([os.path.basename(f) for f in glob.glob("data/hcol_fastas/*.fasta")])
+HCOL_TYPES = [f.replace(".fasta", "") for f in HCOL_FASTAS]
+
+CLASSES = ["Hydrozoa", "Scyphozoa", "Staurozoa", "Cubozoa"]
+CLASS_DB_MAP = {
+    "Hydrozoa": "data/tsa_dbs/hydrozoa_db",
+    "Scyphozoa": "data/tsa_dbs/scyp_db",
+    "Cubozoa": "data/tsa_dbs/cubozoa_db",
+    "Staurozoa": "data/tsa_dbs/stau_db"
+}
+
+###############################################
+# RULE ALL
+###############################################
+
+rule all:
+    input:
+        expand("results/reciprocal/{hcol}_{class_type}.tsv", hcol=HCOL_TYPES, class_type=CLASSES),
+        expand("results/interpro/{hcol}_{class_type}.tsv", hcol=HCOL_TYPES, class_type=CLASSES),
+        expand("results/interpro/{hcol}_{class_type}_analysis.csv", hcol=HCOL_TYPES, class_type=CLASSES),
+        expand("results/final_summary/{hcol}_{class_type}_summary.csv", hcol=HCOL_TYPES, class_type=CLASSES)
+
+###############################################
+# BLAST TSA
+###############################################
+
+rule blast_tsa:
+    input:
+        fasta="data/hcol_fastas/{hcol}.fasta",
+        db=lambda wildcards: multiext(CLASS_DB_MAP[wildcards.class_type],
+            ".ndb",
+            ".nhr",
+            ".nin",
+            ".not",
+            ".nsq",
+            ".ntf",
+            ".nto")
+    output:
+        final="results/blast/{hcol}_{class_type}_final.tsv",
+        temp_raw=temp("results/blast/{hcol}_{class_type}_raw.tsv"),
+        temp_best=temp("results/blast/{hcol}_{class_type}_best_per_contig.tsv")
+    threads: 8
+    params:
+        db_prefix=lambda wildcards: CLASS_DB_MAP[wildcards.class_type]
+    shell:
+        """
+        module load tools/env/proxy
+        module load apps/binapps/blast/2.17.0
+
+        tblastn \
+            -query {input.fasta} \
+            -db {params.db_prefix} \
+            -outfmt "6 qseqid sseqid pident length qcovs evalue bitscore stitle" \
+            -evalue 1e-3 \
+            -seg no \
+            -soft_masking false \
+            -num_threads {threads} \
+            > {output.temp_raw}
+
+        LC_ALL=C sort -t$'\t' -k2,2 -k7,7nr -k6,6g {output.temp_raw} \
+        | awk '!seen[$2]++' \
+        > {output.temp_best}
+
+        awk -F'\t' 'BEGIN{{OFS="\t"}} {{
+            match($8, /TSA: ([A-Za-z]+ [A-Za-z0-9\.\-]+)/, arr);
+            species = (arr[1] ? arr[1] : "Unknown");
+            gsub(/sp\./, "sp", species);
+            print $1, $2, $3, $4, $5, $6, $7, species
+            }}' {output.temp_best} > {output.final}
+
+        sed -i '1i qseqid\tsseqid\tpident\tlength\tqcovs\tevalue\tbitscore\tspecies' {output.final}
+        """
+
+###############################################
+# FIND NEW SPECIES
+###############################################
+
+rule find_new_species:
+    input:
+        blast="results/blast/{hcol}_{class_type}_final.tsv",
+        known=KNOWN
+    output:
+        species="results/new_species/new_species_{hcol}_{class_type}.txt"
+    script:
+        "scripts/find_gaps.py"
+
+###############################################
+# EXTRACT FASTAS
+###############################################
+
+rule extract_fasta:
+    input:
+        species_list="results/new_species/new_species_{hcol}_{class_type}.txt",
+        tsa_fasta="data/tsa_fasta_files/combined_tsa_nucl.fasta"
+    output:
+        "results/extracted_fastas/{hcol}_{class_type}_new.fasta"
+    script:
+        "scripts/pull_fasta.py"
+
+###############################################
+# LONGEST ORF
+###############################################
+
+rule longest_orf:
+    input:
+        "results/extracted_fastas/{hcol}_{class_type}_new.fasta"
+    output:
+        final_orf="results/orfs/{hcol}_{class_type}_longest_orfs.fasta"
+    conda:
+        "envs/orfipy.yaml"
+    run:
+        if os.path.getsize(input[0]) == 0:
+            shell("touch {output.final_orf}")
+        else:
+            shell("""
+                export OMP_NUM_THREADS=1
+                export OPENBLAS_NUM_THREADS=1
+                export MKL_NUM_THREADS=1
+                export NUMEXPR_NUM_THREADS=1
+
+                TMP_DIR="results/orfs/{wildcards.hcol}_{wildcards.class_type}_tmp"
+                mkdir -p "$TMP_DIR"
+
+                orfipy {input} \
+                    --pep {wildcards.hcol}_{wildcards.class_type}_all_orfs.pep \
+                    --outdir "$TMP_DIR" \
+                    --procs 2
+
+                seqkit sort -l -r "$TMP_DIR"/{wildcards.hcol}_{wildcards.class_type}_all_orfs.pep \
+                    -o "$TMP_DIR"/{wildcards.hcol}_{wildcards.class_type}_sorted.pep
+
+                seqkit rmdup -i --id-regexp "^([^._]+)" \
+                    "$TMP_DIR"/{wildcards.hcol}_{wildcards.class_type}_sorted.pep \
+                    > {output.final_orf}
+
+                rm -rf "$TMP_DIR"
+            """)
+
+###############################################
+# INTERPROSCAN
+###############################################
+
+rule interproscan:
+    input:
+        pep="results/orfs/{hcol}_{class_type}_longest_orfs.fasta"
+    output:
+        tsv="results/interpro/{hcol}_{class_type}.tsv"
+    run:
+        if os.path.getsize(input.pep) == 0:
+            shell("touch {output.tsv}")
+        else:
+            shell("""
+                module purge
+                module load tools/openjdk/11.0.2
+                BASENAME=results/interpro/{wildcards.hcol}_{wildcards.class_type}
+                /opt/apps/apps/binapps/interproscan/5.48-83.0/interproscan.sh \
+                    -i {input.pep} -f tsv -b "$BASENAME" -dp -goterms -iprlookup
+                sed -i '1i protein_accession\tmd5\tlength\tanalysis\tsignature_accession\tsignature_description\tstart\tend\tscore\tstatus\tdate\tinterpro_accession\tinterpro_description\tgo_term' ${{BASENAME}}.tsv
+            """)
+
+
+###############################################
+# RECIPROCAL BLAST
+###############################################
+
+rule reciprocal_blast:
+    input:
+        orf="results/orfs/{hcol}_{class_type}_longest_orfs.fasta",
+        db=multiext(HCOL_DB,
+            ".pdb", ".phr", ".pin", ".pog", ".psq",
+            ".ptf", ".pto", ".pjs", ".pos", ".pot")
+    output:
+        "results/reciprocal/{hcol}_{class_type}.tsv"
+    threads: 4
+    run:
+        if os.path.getsize(input.orf) == 0:
+            shell("touch {output}")
+        else:
+            shell("""
+                module load tools/env/proxy
+                module load apps/binapps/blast/2.17.0
+                blastp -query {input.orf} -db {HCOL_DB} \
+                    -outfmt '6 qseqid sseqid pident length evalue bitscore' \
+                    -max_target_seqs 1 -num_threads {threads} > {output}
+            """)
+
+
+###############################################
+# CLASSIFY DOMAINS + PLOTS
+###############################################
+
+rule classify_domains:
+    input:
+        tsv="results/interpro/{hcol}_{class_type}.tsv"
+    output:
+        csv="results/interpro/{hcol}_{class_type}_analysis.csv"
+    script:
+        "scripts/classify_domains.py"
+
+###############################################
+# COMPILE FINAL RESULTS
+###############################################
+
+rule compile_final_results:
+    input:
+        blast="results/blast/{hcol}_{class_type}_final.tsv",
+        orfs="results/orfs/{hcol}_{class_type}_longest_orfs.fasta",
+        fasta="results/extracted_fastas/{hcol}_{class_type}_new.fasta",
+        new_species="results/new_species/new_species_{hcol}_{class_type}.txt"
+    output:
+        summary="results/final_summary/{hcol}_{class_type}_summary.csv"
+    params:
+        hcol_type="{hcol}",
+        class_type="{class_type}"
+    script:
+        "scripts/compile_summary.py"
