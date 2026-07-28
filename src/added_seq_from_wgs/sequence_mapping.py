@@ -227,7 +227,7 @@ def plot_domain_arcitecture(seq_length, domains, output, title = "Domain Archite
             y = 0.15
             va = "top"
 
-        if width >= 60:
+        if width >= 200:
             ax.text(
                 start + width/2, 0.5, label,
                 ha="center", va="center", fontsize=8, color="black"
@@ -246,13 +246,13 @@ def plot_domain_arcitecture(seq_length, domains, output, title = "Domain Archite
     plt.tight_layout()
     fig.savefig(f"{output}.png", dpi=300)
 
-HCOL_TYPE = "hcol8"
-with open(f"r_luteum_{HCOL_TYPE}_prediction.fasta", "r") as file:
+HCOL_TYPE = "hcol6"
+with open(f"h_viridissima/predicted/{HCOL_TYPE}/h_viridissima_{HCOL_TYPE}_prediction.fasta", "r") as file:
     target_lines = file.readlines()
 USER_SEQUENCE = "".join([line.strip() for line in target_lines if not line.startswith(">")])
-TARGET_NAME = f"r_luteum_{HCOL_TYPE}"
-SP_START = 0
-SP_END = 0
+TARGET_NAME = f"hydra_{HCOL_TYPE}"
+SP_START = 1
+SP_END = 21
 
 if __name__ == "__main__":
     hmm_domains = scan_with_hmmer(USER_SEQUENCE)

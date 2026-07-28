@@ -13,9 +13,11 @@ def main():
     )
     parser.add_argument("--coords", help="Path to coordinates JSON (defaults to <hcol_type>_domain_coords.json)")
     parser.add_argument("--outdir", help="Output directory (defaults to blast)")
+    parser.add_argument("--species", help="name of target species, which directory should it look in")
     args = parser.parse_args()
 
     hcol_type = args.hcol_type
+    species = args.species
 
     coord_file = args.coords if args.coords else f"blast_fragments/{hcol_type}_domain_coords.json"
     out_dir_path = Path(args.outdir) if args.outdir else Path(f"blast_fragments")
@@ -29,7 +31,7 @@ def main():
     except FileNotFoundError:
         raise FileNotFoundError(f"Could not find coordinates file: {coord_file}. Did you run the mapping pipeline script first?")
 
-    ref_fasta = f"r_esculentum_{hcol_type}.fasta"
+    ref_fasta = f"{species}/ref_seqs/{hcol_type}.fasta"
 
     try:
         records = list(SeqIO.parse(ref_fasta, "fasta"))
@@ -72,8 +74,6 @@ def main():
 
     SeqIO.write(combined_recs, combined_fasta, "fasta")
     print(f"\nCombined file: {combined_fasta.name} ({len(combined_recs)} fragments)")
-    print(f"\nReady for TBLASTN search: ")
-    print(f" tblastn -query {combined_fasta} -db r_luteum_wgs_db ...")
 
 if __name__ == "__main__":
     main()

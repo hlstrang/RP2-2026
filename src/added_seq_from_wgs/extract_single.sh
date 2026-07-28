@@ -1,9 +1,8 @@
 #!/bin/bash --login
-#SBATCH -p multicore
+#SBATCH -p serial
 #SBATCH -t 2-0
 #SBATCH -o extraction.out
 #SBATCH -e extraction.err
-#SBATCH -c 8
 
 module purge
 module load apps/binapps/blast/2.17.0
@@ -29,7 +28,7 @@ tblastn \
   -query blast_fragments/"${HCOL_TYPE}"_consensus_anchors_combined.fasta \
   -db db/hydra_wgs_db \
   -outfmt "6 qseqid sseqid pident length qcovs qstart qend sstart send evalue bitscore" \
-  -evalue 1e-3 \
+  -evalue 1 \
   -seg no \
   -soft_masking false \
   -num_threads 8 \
@@ -39,14 +38,9 @@ sed -i '1i qseqid\tsseqid\tpident\tlength\tqcovs\tqstart\tqend\tsstart\tsend\tev
 
 echo ""
 echo "=========================================="
-echo "STEP 4: Extract fragmented target scaffolds"
+echo "STEP 4: Analyze consensus scoring"
 echo "=========================================="
-echo "Extracting Rank 1 scaffold..."
-python3 tblastn_analysis.py "${HCOL_TYPE}" --rank 1 --output-fasta hydra_"${HCOL_TYPE}"_cterm.fasta
+python3 tblastn_analysis.py "${HCOL_TYPE}" --cushion 50000 --rank 2
 
 echo ""
-echo "Extracting Rank 2 scaffold..."
-python3 tblastn_analysis.py "${HCOL_TYPE}" --rank 6 --output-fasta hydra_"${HCOL_TYPE}"_nterm.fasta
-
-echo ""
-echo "Extraction complete. Two scaffolds extracted: hydra_${HCOL_TYPE}_cterm.fasta and hydra_${HCOL_TYPE}_nterm.fasta"
+echo "Extraction complete."

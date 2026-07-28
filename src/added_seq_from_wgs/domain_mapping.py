@@ -5,7 +5,10 @@ import re
 from pathlib import Path
 from Bio import SeqIO
 
-REFERENCE_FASTA_TEMPLATE = "r_esculentum_{}.fasta"
+## Change species
+SPECIES = "h_viridissima"
+
+REFERENCE_FASTA_TEMPLATE = f"{SPECIES}/ref_seqs/{{}}.fasta"
 HMM_DB = "domains.hmm"
 OUTPUT_JSON_TEMPLATE = "blast_fragments/{}_domain_coords.json"
 C_TERMINAL_TARGET_DOMAINS = ['COLFI', 'C4']
@@ -119,13 +122,16 @@ def build_tblastn_anchors(sp_coords, all_domains, sequence_length):
     modular_domains = [d for d in all_domains if d['category'] == "other_modular"]
 
     if sp_info:
-        n_term_end = min(sp_info['end'] + 100, sequence_length)
+        n_term_end = min(sp_info['end'] + 1, sequence_length)
 
         if modular_domains:
             max_modular_end = max(d['end'] for d in modular_domains)
             if n_term_end < (max_modular_end + 20):
                 n_term_end = min(max_modular_end + 20, sequence_length)
                 print(f"[DYNAMIC] Extended N-term anchor to aa {n_term_end} to safeguard all N-terminal modular domains ({', '.join(set(d['name'] for d in modular_domains))}).")
+        else:
+            n_term_end = min(sp_info['end'] + 100, sequence_length)
+            print(f"[NO DOMAINS] Extending N-term anchor by +100 aa (no modular domains detected).")
 
         n_term_anchor = {
             'query_label':f'{ref_id}_Nterm_SP_start',
@@ -221,6 +227,18 @@ def main():
         default=25,
         help="End coordinate for the Signal Peptide from SignalP (default = 25)"
     )
+    parser.add_argument(
+        "--tspn_start",
+        type = int,
+        default=0,
+        help="Start coordinate for TSPN domain from SMART"
+    )
+    parser.add_argument(
+        "--tspn_end",
+        type = int,
+        default=0,
+        help="End coordinate for TSPN domain from SMART"
+    )
     args = parser.parse_args()
     hcol_type = args.hcol_type
     reference_fasta = REFERENCE_FASTA_TEMPLATE.format(hcol_type)
@@ -248,6 +266,17 @@ def main():
     }
 
     all_domains = run_hmmer_domains(seq_str)
+    if args.tspn_start > 0 and args.tspn_end > 0:
+        tspn_domain = {
+            "name": "TSPN",
+            "start": args.tspn_start,
+            "end": args.tspn_end,
+            "length": int(args.tspn_end - args.tspn_start + 1),
+            "evalue": 0.0,
+            "category": classify_domain_category("TSPN")
+        }
+        all_domains.append(tspn_domain)
+        print(f"[MANUAL] Added TSPN domain: aa {args.tspn_start}-{args.tspn_end} ({tspn_domain['length']} aa)")
     triplex_regions = detect_triple_helix(seq_str)
     anchor_fragments = build_tblastn_anchors(sp_coordinates, all_domains, seq_length)
 

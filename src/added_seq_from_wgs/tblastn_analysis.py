@@ -1,11 +1,17 @@
 import argparse
+import os
 import subprocess
 import sys
 import pandas as pd
 
-BLAST_RESULTS_TEMPLATE = "luteum_{}_query.tsv"
-OUTPUT_FASTA_TEMPLATE = "r_luteum_{}_fragment.fasta"
-WGS_DB_NAME = "db/r_luteum_wgs_db"
+## Change species
+SPECIES = "h_viridissima"
+
+BLAST_RESULTS_TEMPLATE = f"{SPECIES}/genomic_fragments/{{}}/{SPECIES}_{{}}_query.tsv"
+OUTPUT_FASTA_TEMPLATE = f"{SPECIES}/genomic_fragments/{{}}/{SPECIES}_{{}}_fragment.fasta"
+
+## Update db name
+WGS_DB_NAME = "db/hydra_wgs_db"
 CUSHION = 5000
 
 def extract_scaffold_name(sseqid):
@@ -128,11 +134,17 @@ def calculate_and_extract(blast_results, output_fasta, cushion_size, rank=1):
 
     extract_start = max(1, min_coord - cushion_size)
     extract_end = max_coord + cushion_size
+
     coord_range = f"{extract_start}-{extract_end}"
+
     extracted_length = extract_end - extract_start + 1
 
     print(f"\nGene body spans {min_coord:,} to {max_coord:,} on scaffold {top_scaffold}")
     print(f"Applying {cushion_size:,}bp padding -> Extraction Range: {coord_range} ({extracted_length:,} bp)")
+
+    out_dir = os.path.dirname(output_fasta)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
 
     print(f"\nPulling genomic fragment from database...")
     try:
@@ -182,8 +194,16 @@ def main():
     args = parser.parse_args()
     hcol_type = args.hcol_type
 
-    blast_results = args.blast_results if args.blast_results else BLAST_RESULTS_TEMPLATE.format(hcol_type)
-    output_fasta = args.output_fasta if args.output_fasta else OUTPUT_FASTA_TEMPLATE.format(hcol_type)
+    blast_results = (
+        args.blast_results
+        if args.blast_results
+        else BLAST_RESULTS_TEMPLATE.format(hcol_type, hcol_type)
+    )
+    output_fasta = (
+        args.output_fasta
+        if args.output_fasta
+        else OUTPUT_FASTA_TEMPLATE.format(hcol_type, hcol_type)
+    )
 
     calculate_and_extract(blast_results, output_fasta, args.cushion, args.rank)
 
