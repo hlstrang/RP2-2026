@@ -102,10 +102,6 @@ def find_triple_helix(sequence, max_gap_allowed=7):
     return final_domains
 
 def add_manual_domain(name, start, end, colour=None):
-    """
-    Manually specify a domain region with known coordinates,
-    bypassing HMMER/regex detection entirely.
-    """
     return {
         "name": name,
         "start": start,
@@ -184,13 +180,184 @@ def classify_and_validate(domains, expected_family):
 
     return "Unidentified Collagen", "UNVERIFIED"
 
+def classify_unknown_collagen(domains, seq_length):
+    REFERENCE_PROFILES = {
+        "HCOL1": {
+            "required": {"col1": 1, "col2": 1, "colfi": True},
+            "optional": [],
+            "constraints": {
+                "col1_len": (1010, 1030),
+                "col2_len": (50, 65)
+            }
+        },
+        "HCOL2A": {
+            "required": {"col1": 1, "col2": 1, "wap": 1},
+            "optional": ["vwa"],
+            "constraints": {}
+        },
+        "HCOL2B": {
+            "required": {"col1": 1, "col2": 1, "wap": 2},
+            "optional": [],
+            "constraints": {}
+        },
+        "HCOL3": {
+            "required": {"wap": (">", 1), "vwa": (">", 1), "colfi": True},
+            "optional": [],
+            "constraints": {}
+        },
+        "HCOL4": {
+            "required": {"c4": (">=", 2)},
+            "forbidden": {"vwa": 0},
+            "constraints": {}
+        },
+        "HCOL5": {
+            "required": {"col1": 1, "col2": 1, "colfi": True},
+            "optional": [],
+            "constraints": {
+                "col1_len": (1020, 1035),
+                "col2_start_gap": (">", 20)
+            }
+        },
+        "HCOL6": {
+            "required": {"wap": (">", 1), "vwa": (">", 1), "c4": (">=", 2)},
+            "optional": [],
+            "constraints": {}
+        },
+        "HCOL7": {
+            "required": {"tspn": 1, "colfi": True},
+            "optional": [],
+            "constraints": {}
+        },
+        "HCOL8": {
+            "required": {"col1": (">=", 3)},
+            "forbidden": {"col2": 0, "col2_len_lt_30": True},
+            "constraints": {}
+        }
+    }
+
+    domain_counts = {
+        "col1": len([d for d in domains if d["name"] == "Col1"]),
+        "col2": len([d for d in domains if d["name"] == "Col2"]),
+        "wap": len([d for d in domains if d["name"] == "WAP"]),
+        "vwa": len([d for d in domains if d["name"] == "VWA"]),
+        "c4": len([d for d in domains if d["name"] == "C4"]),
+        "tspn": len([d for d in domains if d["name"] == "TSPN"]),
+        "colfi": len([d for d in domains if d["name"] == "COLFI"]) > 0,
+    }
+
+    domain_lengths = {}
+    for domain_type in ["col1", "col2"]:
+        matches = [d for d in domains if d["name"] == domain_type.title()]
+        if matches:
+            domain_lengths[f"{domain_type}_len"] = matches[0]["end"] - matches[0]["start"]
+
+    domain_gaps = {}
+    col1_domains = [d for d in domains if d["name"] == "Col1"]
+    col2_domains = [d for d in domains if d["name"] == "Col2"]
+    if col1_domains and col2_domains:
+        domain_gaps["col2_start_gap"] = col2_domains[0]["start"] - col1_domains[0]["end"]
+
+    scores = {}
+    for hcol_type, profile in REFERENCE_PROFILES.items():
+        score = 0
+        max_possible = 0
+        violations = []
+
+        for domain_key, condition in profile["required"].items():
+            max_possible += 1
+
+            if isinstance(condition, dict):
+                pass
+            elif isinstance(condition, tuple) and condition[0] in [">", ">="]:
+                if condition[0] == ">":
+                    if domain_counts.get(domain_key, 0) > condition[1]:
+                        score += 1
+                    else:
+                        violations.append(f"{domain_key}: need >{condition[1]}, got {domain_counts.get(domain_key, 0)}")
+                else:
+                    if domain_counts.get(domain_key, 0) >= condition[1]:
+                        score += 1
+                    else:
+                        violations.append(f"{domain_key}: need >={condition[1]}, got {domain_counts.get(domain_key, 0)}")
+            else:
+                if domain_counts.get(domain_key, 0) == condition:
+                    score += 1
+                else:
+                    violations.append(f"{domain_key}: need {condition}, got {domain_counts.get(domain_key, 0)}")
+
+        if "forbidden" in profile:
+            for domain_key, value in profile["forbidden"].items():
+                if value == 0 and domain_counts.get(domain_key, 0) > 0:
+                    violations.append(f"Forbidden {domain_key} found: {domain_counts.get(domain_key, 0)}")
+
+                elif domain_key == "col2_len_lt_30" and value is True:
+                    col2_domains_check = [d for d in domains if d["name"] == "Col2"]
+                    if col2_domains_check:
+                        col2_length = col2_domains_check[0]["end"] - col2_domains_check[0]["start"]
+                        if col2_length >= 30:
+                            violations.append(
+                                f"Forbidden col2 with length >= 30 found: {col2_length} aa"
+                            )
+
+        if "constraints" in profile:
+            for constraint_key, constraint_val in profile["constraints"].items():
+                if constraint_key.endswith("_len") and isinstance(constraint_val, tuple):
+                    max_possible += 0.5
+                    if constraint_key in domain_lengths:
+                        length = domain_lengths[constraint_key]
+                        min_len, max_len = constraint_val
+                        if min_len <= length <= max_len:
+                            score += 0.5
+                        else:
+                            violations.append(f"{constraint_key}: {length} outside [{min_len}, {max_len}]")
+
+                elif constraint_key == "col2_start_gap":
+                    max_possible += 0.5
+                    if constraint_key in domain_gaps:
+                        gap = domain_gaps[constraint_key]
+                        if isinstance(constraint_val, tuple) and constraint_val[0] == ">":
+                            if gap > constraint_val[1]:
+                                score += 0.5
+                            else:
+                                violations.append(f"col2_start_gap: {gap} (need >{constraint_val[1]})")
+
+        if max_possible > 0:
+            scores[hcol_type] = {
+                "score": score / max_possible,
+                "matches": f"{score}/{max_possible}",
+                "violations": violations,
+                "confidence": "high" if score / max_possible >= 0.8 else "medium" if score / max_possible >= 0.5 else "low"
+            }
+
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1]["score"], reverse=True)
+
+    if sorted_scores:
+        best_match = sorted_scores[0]
+
+        print(f"\n{'='*60}")
+        print(f"UNKNOWN COLLAGEN CLASSIFICATION RESULTS")
+        print(f"{'='*60}")
+        print(f"\nBest Match: {best_match[0]}")
+        print(f"Match Score: {best_match[1]['matches']}")
+        print(f"Confidence: {best_match[1]['confidence'].upper()}")
+
+        if best_match[1]['violations']:
+            print(f"\nWarnings/Constraints Violated:")
+            for v in best_match[1]['violations']:
+                print(f"  - {v}")
+
+        print(f"\nTop Candidates:")
+        for hcol_type, data in sorted_scores[:3]:
+            marker = ">>> " if hcol_type == best_match[0] else "    "
+            print(f"  {marker}{hcol_type}: {data['matches']} ({data['confidence']})")
+
+        print(f"{'='*60}\n")
+
+        return best_match[0], best_match[1]['confidence'], best_match[1]['violations']
+    else:
+        return "UNKNOWN", "none", ["No reference profiles matched"]
+
 def plot_domain_arcitecture(seq_length, domains, output, title = "Domain Architecture"):
-    """
-    domains: list of dicts with keys:
-        - name: str
-        - start: int
-        - end: int
-        - colour: str (optional)"""
     default_colours = [
         "#4C72B0", "#55A868", "#C44E52", "#8172B3",
         "#CCB974", "#64B5CD", "#8C8C8C"
@@ -246,13 +413,24 @@ def plot_domain_arcitecture(seq_length, domains, output, title = "Domain Archite
     plt.tight_layout()
     fig.savefig(f"{output}.png", dpi=300)
 
-HCOL_TYPE = "hcol6"
+def classify_sequence(domains, expected_family=None):
+    if expected_family:
+        identity, verdict = classify_and_validate(domains, expected_family)
+        if verdict == "PASSED":
+            return identity, "CONFIRMED", None
+        else:
+            unknown_identity, confidence, violations = classify_unknown_collagen(domains, len(domains))
+            return f"{unknown_identity} (expected {expected_family})", verdict, violations
+    else:
+        return classify_unknown_collagen(domains, len(domains))
+
+HCOL_TYPE = "hcol2b"
 with open(f"h_viridissima/predicted/{HCOL_TYPE}/h_viridissima_{HCOL_TYPE}_prediction.fasta", "r") as file:
     target_lines = file.readlines()
 USER_SEQUENCE = "".join([line.strip() for line in target_lines if not line.startswith(">")])
 TARGET_NAME = f"hydra_{HCOL_TYPE}"
 SP_START = 1
-SP_END = 21
+SP_END = 22
 
 if __name__ == "__main__":
     hmm_domains = scan_with_hmmer(USER_SEQUENCE)
