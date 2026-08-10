@@ -1,4 +1,4 @@
-### Accession numbers for the new species of Medusozoans with TSA data available
+### Supplementary Table S2: Accession numbers for the new species of Medusozoans with TSA data available
 
 | Species | Class | Accession | BioProject ID |
 | :---:  |  :---:    |  :---:      | :---:      |
