@@ -11,7 +11,7 @@ Python scripts:
 2. domain_architecture.py
 
 ## WGS Extraction
-This process reuqired tblastn using the N- and C-temrini as separate reference sequences, which meant knowing the coordinates of the signal peptide. As this was unreliable using HMMER domains, it was done manually using SignalP, and therefore, was not automated.
+This process required tblastn using the N- and C-temrini as separate reference sequences, which meant knowing the coordinates of the signal peptide. As this was unreliable using HMMER domains, it was done manually using SignalP, and therefore, was not automated.
 
 Instead, it is run using three main Bash scripts:
 1. full_extraction.sh
@@ -25,3 +25,12 @@ Within these, python scripts are used:
 4. parse_miniprot_output.py
 5. sequence_mapping.py
 
+## Domain Architecture
+The domains were mapped against a cutsom HMM database, with accession numbers shown here. The triple helix regex matching expression was:
+
+    r"(G..){3,}"
+
+Which highlights sequences of a Glycine followed by two other amino acids. To account for small interruptions, a max gap of 9 amino acids was allowed where the triple helix was still combined as one. If there was a gap longer than this threshold, this was counted as two triple helix domains.
+
+## Phylogenetic Analysis
+Hcol1 sequences were extracted from the collagenome and once the newick file was obtained, the R script 'phylogeny.R' was used to create the tree topology. 
