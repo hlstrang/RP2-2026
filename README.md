@@ -4,14 +4,14 @@
 Supplementary materials and source code
 
 ## TSA Extraction
-To automate this process, Snakemake was used. However, after implementing the Snakefile, it is important to verify the outputs, especially as there is no option to extract scaffolds other than the top for each species. Needs ofipy and pyhmmer dependencies.
+To automate this process, Snakemake was used. However, after implementing the Snakefile, it is important to verify the outputs, especially as there is no option to extract scaffolds other than the top for each species. Needs orfipy and pyhmmer dependencies.
 
 Python scripts:
 1. pull_fasta.py
 2. domain_architecture.py
 
 ## WGS Extraction
-This process required tblastn using the N- and C-temrini as separate reference sequences, which meant knowing the coordinates of the signal peptide. As this was unreliable using HMMER domains, it was done manually using SignalP, and therefore, was not automated.
+This process required tblastn using the N- and C-termini as separate reference sequences, which meant knowing the coordinates of the signal peptide. As this was unreliable using HMMER domains, it was done manually using SignalP, and therefore, was not automated.
 
 Instead, it is run using three main Bash scripts:
 1. full_extraction.sh
@@ -33,4 +33,4 @@ The domains were mapped against a cutsom HMM database, with accession numbers sh
 Which highlights sequences of a Glycine followed by two other amino acids. To account for small interruptions, a max gap of 9 amino acids was allowed where the triple helix was still combined as one. If there was a gap longer than this threshold, this was counted as two triple helix domains.
 
 ## Phylogenetic Analysis
-Hcol1 sequences were extracted from the collagenome and once the newick file was obtained, the R script 'phylogeny.R' was used to create the tree topology. 
+Hcol1 sequences were extracted from the collagenome and once the newick file was obtained, the R script 'phylogeny.R' was used to create the tree topology.
