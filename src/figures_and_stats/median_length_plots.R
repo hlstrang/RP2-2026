@@ -39,7 +39,7 @@ structure_median <- df %>%
         "wap",
         "col1",
         "col2",
-        "colfi",
+        "colf1",
         "c4"
       )
     )
@@ -88,7 +88,7 @@ structure_mean <- df %>%
         "wap",
         "col1",
         "col2",
-        "colfi",
+        "colf1",
         "c4"
       )
     )

@@ -267,14 +267,13 @@ collagen_data <- data.frame(
     "Col1 and Col2 present",
     "Col1 length = ~1000 aa with several short interruptions; No Col2; Longer gap between SP and Col1"
   ),
-  `C-terminus` = c("COLFI", "COLFI", "COLFI", "C4", "COLFI", "C4", "COLFI", "COLFI"),
+  `C-terminus` = c("COLF1", "COLF1", "COLF1", "C4", "COLF1", "C4", "COLF1", "COLF1"),
   stringsAsFactors = FALSE
 )
 colnames(collagen_data) <- c("Collagen Type", "Non-collagenous Domains", "Triple Helix Structure", "C-terminus")
 caption_style <- fp_text(color = "#1A365D", font.size = 12)
 footer_style <- fp_text(color = "#0F172A")
 ft_table <- flextable(collagen_data) %>%
-  set_caption(caption = "Classification criteria for Cnidarian collagen types (Hcol1–Hcol8) based on domain architecture, triple helix structure, and C-terminus structure.") %>%
   add_footer_lines("Col1: Major triple-helical domain (>60 amino acids); Col2: Minor triple-helical domain (<60 amino acids). WAP: Whey Acidic Protein domain; VWA: Von Willebrand A domain; TSPN: Thrombospondin N-terminal domain.") %>%
   align(align = "center", part = "all") %>%
   autofit() %>%

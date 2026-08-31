@@ -89,74 +89,6 @@ hcol1_summary <- hcol1_domain_stats %>%
 print(hcol1_summary)
 median(hcol1_domain_stats$total_seq_length)
 
-col1_data <- hcol1_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol1_domain_stats %>% filter(domain_name == "Col2")
-kruskal.test(domain_prop ~ class, data = col2_data)
-
-colfi_data <- hcol1_domain_stats %>% filter(domain_name == "COLFI")
-kruskal.test(domain_prop ~ class, data = colfi_data)
-colfi <- ggbetweenstats(
-  data = colfi_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "COLFI") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-colfi <- colfi +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-colfi
-
-sp_data <- hcol1_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-
-combined_plots <- combine_plots(
-  list(col1, colfi),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=18.81, p=0.0003; COLFI χ²=30.08, p=1.33e-6"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
-
 ## Hcol2 Stats
 hcol2 <- hcol2a %>%
   bind_rows(hcol2b) %>%
@@ -194,100 +126,6 @@ hcol2_summary <- hcol2_domain_stats %>%
 
 print(hcol2_summary)
 median(hcol2_domain_stats$total_seq_length)
-
-col1_data <- hcol2_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol2_domain_stats %>% filter(domain_name == "Col2")
-kruskal.test(domain_prop ~ class, data = col2_data)
-
-colfi_data <- hcol2_domain_stats %>% filter(domain_name == "COLFI")
-kruskal.test(domain_prop ~ class, data = colfi_data)
-colfi <- ggbetweenstats(
-  data = colfi_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "COLFI") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-colfi <- colfi +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-colfi
-
-sp_data <- hcol2_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-
-wap_data <- hcol2_domain_stats %>% filter(domain_name == "WAP")
-kruskal.test(domain_prop ~ class, data = wap_data)
-wap <- ggbetweenstats(
-  data = wap_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "WAP") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-wap <- wap +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-wap
-
-combined_plots <- combine_plots(
-  list(col1, colfi, wap),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=19.38, p=0.0003; COLFI χ²=19.26, p=2.41e-04; WAP χ²=15.21, p=0.00165"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
 
 ## Hcol3 Stats
 hcol3 <- hcol3 %>%
@@ -328,103 +166,6 @@ hcol3_summary <- hcol3_domain_stats %>%
 print(hcol3_summary)
 mean(hcol3_domain_stats$total_seq_length)
 
-col1_data <- hcol3_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol3_domain_stats %>% filter(domain_name == "Col2")
-kruskal.test(domain_prop ~ class, data = col2_data)
-
-colfi_data <- hcol3_domain_stats %>% filter(domain_name == "COLFI")
-kruskal.test(domain_prop ~ class, data = colfi_data)
-colfi <- ggbetweenstats(
-  data = colfi_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "COLFI") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-colfi <- colfi +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-colfi
-
-sp_data <- hcol3_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-sp <- ggbetweenstats(
-  data = sp_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Signal Peptide") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-sp <- sp +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-sp
-
-wap_data <- hcol3_domain_stats %>% filter(domain_name == "WAP")
-kruskal.test(domain_prop ~ class, data = wap_data)
-
-vwa_data <- hcol3_domain_stats %>% filter(domain_name == "VWA")
-kruskal.test(domain_prop ~ class, data = vwa_data)
-
-combined_plots <- combine_plots(
-  list(col1, colfi, sp),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=11.82, p=0.00801; COLFI χ²=10.32, p=0.0161; SP χ²=8.69, p=0.0337"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
-
 ## Hcol4 Stats
 hcol4 <- hcol4 %>%
   filter(accession != "GANB01000001.1") %>%
@@ -464,73 +205,6 @@ hcol4_summary <- hcol4_domain_stats %>%
 print(hcol4_summary)
 mean(hcol4_domain_stats$total_seq_length)
 
-col1_data <- hcol4_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol4_domain_stats %>% filter(domain_name == "Col2")
-
-c4_data <- hcol4_domain_stats %>% filter(domain_name == "C4")
-kruskal.test(domain_prop ~ class, data = c4_data)
-
-sp_data <- hcol4_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-sp <- ggbetweenstats(
-  data = sp_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Signal Peptide") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-sp <- sp +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-sp
-
-combined_plots <- combine_plots(
-  list(col1, sp),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=8.25, p=0.0393; SP χ²=15.57, p=0.0014"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
-
 ## Hcol5 Stats
 hcol5 <- hcol5 %>%
   mutate(seq_length = nchar(sequence))
@@ -566,120 +240,6 @@ hcol5_summary <- hcol5_domain_stats %>%
   )
 print(hcol5_summary)
 mean(hcol5_domain_stats$total_seq_length)
-
-col1_data <- hcol5_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol5_domain_stats %>% filter(domain_name == "Col2")
-kruskal.test(domain_prop ~ class, data = col2_data)
-col2 <- ggbetweenstats(
-  data = col2_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col2") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col2 <- col2 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col2
-
-colfi_data <- hcol5_domain_stats %>% filter(domain_name == "COLFI")
-kruskal.test(domain_prop ~ class, data = colfi_data)
-colfi <- ggbetweenstats(
-  data = colfi_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "COLFI") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-colfi <- colfi +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-colfi
-
-sp_data <- hcol5_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-sp <- ggbetweenstats(
-  data = sp_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Signal Peptide") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-sp <- sp +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-sp
-
-combined_plots <- combine_plots(
-  list(col1, col2, colfi, sp),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=12.70, p=0.00037; Col2 χ²=5.981, p=0.0145; COLFI χ²=6.244, p=0.0125; SP χ²=10.01, p=0.00152"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
 
 ## Hcol6 Stats
 hcol6 <- hcol6 %>%
@@ -719,97 +279,6 @@ hcol6_summary <- hcol6_domain_stats %>%
 print(hcol6_summary)
 mean(hcol6_domain_stats$total_seq_length)
 
-col1_data <- hcol6_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol6_domain_stats %>% filter(domain_name == "Col2")
-kruskal.test(domain_prop ~ class, data = col2_data)
-
-c4_data <- hcol6_domain_stats %>% filter(domain_name == "C4")
-kruskal.test(domain_prop ~ class, data = c4_data)
-c4 <- ggbetweenstats(
-  data = c4_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "COLFI") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-c4 <- c4 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-c4
-
-sp_data <- hcol6_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-sp <- ggbetweenstats(
-  data = sp_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Signal Peptide") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-sp <- sp +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-sp
-
-combined_plots <- combine_plots(
-  list(col1, c4, sp),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=20.8, p=0.00012; C4 χ²=18.83, p=0.0003; SP χ²=12.51, p=0.0058"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
-
 ## Hcol7 Stats
 hcol7 <- hcol7 %>%
   filter(!accession %in% c("GHUC01000492.1", "GAOL01025660.1", "GFAS01287089.1", "HAHB01067895.1")) %>%
@@ -848,76 +317,6 @@ hcol7_summary <- hcol7_domain_stats %>%
 print(hcol7_summary)
 mean(hcol7_domain_stats$total_seq_length)
 
-col1_data <- hcol7_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol7_domain_stats %>% filter(domain_name == "Col2")
-
-colfi_data <- hcol7_domain_stats %>% filter(domain_name == "COLFI")
-kruskal.test(domain_prop ~ class, data = colfi_data)
-
-sp_data <- hcol7_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-
-tspn_data <- hcol7_domain_stats %>% filter(domain_name == "TSPN")
-kruskal.test(domain_prop ~ class, data = tspn_data)
-tspn <- ggbetweenstats(
-  data = tspn_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "TSPN") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-tspn <- tspn +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-tspn
-
-combined_plots <- combine_plots(
-  list(col1, tspn),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=17.39, p=0.00059; TSPN χ²=10.65, p=0.0138"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
-
 ## Hcol8 Stats
 hcol8 <- hcol8 %>%
   mutate(seq_length = nchar(sequence))
@@ -953,97 +352,6 @@ hcol8_summary <- hcol8_domain_stats %>%
   )
 print(hcol8_summary)
 mean(hcol8_domain_stats$total_seq_length)
-
-col1_data <- hcol8_domain_stats %>% filter(domain_name == "Col1")
-kruskal.test(domain_prop ~ class, data = col1_data)
-col1 <- ggbetweenstats(
-  data = col1_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Col1") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-col1 <- col1 +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-col1
-
-col2_data <- hcol8_domain_stats %>% filter(domain_name == "Col2")
-kruskal.test(domain_prop ~ class, data = col2_data)
-
-colfi_data <- hcol8_domain_stats %>% filter(domain_name == "COLFI")
-kruskal.test(domain_prop ~ class, data = colfi_data)
-colfi <- ggbetweenstats(
-  data = colfi_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "COLFI") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-colfi <- colfi +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-colfi
-
-sp_data <- hcol8_domain_stats %>% filter(domain_name == "Signal_Peptide")
-kruskal.test(domain_prop ~ class, data = sp_data)
-sp <- ggbetweenstats(
-  data = sp_data,
-  x = class,
-  y = domain_prop,
-  type = "nonparametric",
-  plot.type = "box",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "significant",
-  centrality.plotting = FALSE,
-  bf.message = FALSE,
-  stats.test = FALSE,
-  ggtheme = theme_basic()
-) +
-  labs(title = "Signal Peptide") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(size = 14),
-    axis.text.y = element_text(size = 10)
-  )
-sp <- sp +
-  labs(subtitle = NULL) +
-  theme(plot.subtitle = element_blank())
-sp
-
-combined_plots <- combine_plots(
-  list(col1, colfi, sp),
-  annotation.args = list(
-    title = "Domain Property Differences Across Classes",
-    caption = "Kruskal-Wallis tests: Col1 χ²=14.52, p=0.00227; COLFI χ²=11.41, p=0.00972; SP χ²=10.37, p=0.00157"
-  )
-) +
-  theme(plot.margin = margin(20, 20, 20, 20))
-combined_plots
 
 ## All Types
 complete_summary <- bind_rows(
@@ -1086,6 +394,7 @@ wide_summary <- complete_summary %>%
     values_from = med_prop_pct
   ) %>%
   arrange(collagen_type)
+write_csv(wide_summary, "collagenome_stats/median_summary.csv")
 
 ft_summary <- flextable(wide_summary) %>%
   theme_zebra() %>%
@@ -1110,6 +419,7 @@ all_domain_comparisons <- hcol1_domain_stats %>%
   )
 
 get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
+  library(dplyr)
 
   results <- lapply(domain_list, function(dom) {
     domain_data <- data_df %>% filter(domain_name == dom)
@@ -1119,19 +429,22 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
 
       hydrozoa_comparisons <- lapply(classes, function(other_class) {
         if(other_class != "Hydrozoans") {
-          d1 <- (domain_data %>% filter(class == "Hydrozoans"))$domain_prop
-          d2 <- (domain_data %>% filter(class == other_class))$domain_prop
+          d1 <- (domain_data %>% filter(class == "Hydrozoans"))$total_domain_length
+          d2 <- (domain_data %>% filter(class == other_class))$total_domain_length
 
           wtest <- wilcox.test(d2, d1, exact = FALSE)
 
-          med1 <- median(d1)
-          med2 <- median(d2)
+          med1 <- median(d1, na.rm = TRUE)
+          med2 <- median(d2, na.rm = TRUE)
           pct_diff <- ((med2 - med1) / med1) * 100
 
           tibble(
             domain = dom,
             compared_class = other_class,
             baseline_class = "Hydrozoans",
+            median_baseline = med1,
+            median_compared = med2,
+            raw_diff = med2 - med1,
             pct_diff = pct_diff,
             abs_pct = abs(pct_diff),
             p.raw = wtest$p.value,
@@ -1162,6 +475,9 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
           domain = dom,
           compared_class = character(),
           baseline_class = character(),
+          median_baseline = numeric(),
+          median_compared = numeric(),
+          raw_diff = numeric(),
           pct_diff = numeric(),
           abs_pct = numeric(),
           p.raw = numeric(),
@@ -1174,6 +490,9 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
         domain = dom,
         compared_class = character(),
         baseline_class = character(),
+        median_baseline = numeric(),
+        median_compared = numeric(),
+        raw_diff = numeric(),
         pct_diff = numeric(),
         abs_pct = numeric(),
         p.raw = numeric(),
@@ -1201,16 +520,11 @@ all_vs_hydrozoa <- bind_rows(
 sig_vs_hydrozoa <- all_vs_hydrozoa %>%
   filter(p.adj < 0.05 & !is.na(p.adj))
 
-heatmap_simple <- sig_vs_hydrozoa %>%
-  group_by(collagen_type, domain) %>%
-  summarise(
-    display_class = compared_class[which.max(log_p)],
-    pct_vs_hydro = pct_diff[which.max(log_p)],
-    log_p = max(log_p),
-    sig_stars = p.signif[which.max(log_p)],
-    n_comparisons = n(),
-    .groups = "drop"
-  )
+ft_summary <- flextable(sig_vs_hydrozoa) %>%
+  theme_zebra() %>%
+  autofit()
+ft_summary <- align(ft_summary, align = "center", part = "all")
+ft_summary
 
 abbr_map <- c(
   "Cubozoans" = "Cubozoan",
@@ -1219,16 +533,33 @@ abbr_map <- c(
   "Staurozoans" = "Staurozoan"
 )
 
-heatmap_simple <- heatmap_simple %>%
+heatmap_top3 <- sig_vs_hydrozoa %>%
+  arrange(collagen_type, domain, desc(log_p)) %>%
+  group_by(collagen_type, domain) %>%
   mutate(
-    short_class = abbr_map[display_class],
-    direction = ifelse(pct_vs_hydro > 0, "↑", "↓"),
-    label_short = paste0(short_class, "\n", direction, abs(round(pct_vs_hydro)), "%", "\n")
+    rank = row_number(),
+    label_line = paste0(
+      abbr_map[compared_class][1],
+      ifelse(pct_diff > 0, "↑", "↓"),
+      abs(round(pct_diff)), "%"
+    )
+  ) %>%
+  summarise(
+    pct_agg = list(pct_diff),
+    log_p_max = max(log_p),
+    label_short = paste0(label_line, collapse = "\n"),
+    pct_vs_hydro = pct_diff[which.max(log_p)],
+    .groups = "drop"
   )
 
-ggplot(heatmap_simple, aes(x = domain, y = collagen_type, fill = pct_vs_hydro)) +
+ggplot(heatmap_top3, aes(x = domain, y = collagen_type, fill = pct_vs_hydro)) +
   geom_tile(color = "white", linewidth = 0.4) +
-  geom_text(aes(label = label_short), size = 2.5, lineheight = 0.7) +
+  geom_text(
+    aes(label = label_short),
+    size = 2.5,              
+    lineheight = 0.65,
+    vjust = 0.5,
+    hjust = 0.5) +
   scale_fill_gradient2(
     low = "#ff8888", mid = "#ffffff", high = "#88dd88",
     midpoint = 0, limits = c(-30, 30),
@@ -1240,9 +571,51 @@ ggplot(heatmap_simple, aes(x = domain, y = collagen_type, fill = pct_vs_hydro)) 
   ) +
   theme_basic() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 8, face = "bold"),
-    axis.text.y = element_text(size = 9, face = "bold"),
-    panel.grid = element_blank(),
-    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),
     legend.position = "right"
   )
+
+# Keep full data (don't aggregate to single row)
+heatmap_data <- sig_vs_hydrozoa %>%
+  mutate(
+    short_class = abbr_map[compared_class],
+    direction = ifelse(pct_diff > 0, "↑", "↓"),
+    pct_label = paste0(direction, abs(round(pct_diff)), "%"),
+    raw_label = paste0(raw_diff, " aa"),
+    combined_label = paste0(pct_label)
+  )
+
+final_fig <- ggplot(heatmap_data, aes(x = domain, y = collagen_type, fill = pct_diff)) +
+  geom_tile(color = "white", linewidth = 0.4) +
+  geom_text(aes(label = combined_label), size = 2.8, lineheight = 0.75) +
+  scale_fill_gradient2(
+    low = "#e74c3c", mid = "#ecf0f1", high = "#2ecc71",
+    midpoint = 0, limits = c(-35, 35),
+    name = "% Change\nvs. Hydrozoans"
+  ) +
+  labs(
+    x = "Domain",
+    y = "Collagen Type"
+  ) +
+  facet_wrap(~short_class, ncol = 2, strip.position = "top") +
+  theme_basic() +
+  theme(
+    legend.position = c(0.78, 0.2),
+    legend.justification = c("center", "center"),
+    legend.direction = "vertical",
+    legend.box.margin = margin(-10, -10, -10, -10),
+    legend.background = element_rect(fill = alpha("white", 0.8)),
+    legend.key.width = unit(0.8, "cm"),
+    legend.key.height = unit(3, "cm"),
+    strip.background = element_rect(fill = "lightgray"),
+    strip.text = element_text(face = "bold", size = 9),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    plot.margin = margin(10, 40, 10, 10)
+  ) +
+  guides(fill = guide_colorbar(
+    barwidth = 0.5,
+    barheight = 8,
+    title.position = "top",
+    label.position = "right"
+  ))
+final_fig
+
