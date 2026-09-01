@@ -6,9 +6,11 @@ library(statsExpressions)
 library(ggpubr)
 library(pheatmap)
 library(flextable)
+library(rstatix)
+setwd("Documents/year_5/rp2")
 
 ## Statistics
-full_df <- read_csv("combined_collagenome.csv")
+full_df <- read_csv("collagenome_stats/combined_collagenome.csv")
 full_df <- full_df %>%
   mutate(hcol_type = tolower(hcol_type) %>% str_remove(" .*"))
 
@@ -19,7 +21,7 @@ names(hcol1_full_df$sequence) <- hcol1_full_df$species
 aa_set <- AAStringSet(hcol1_full_df$sequence)
 writeXStringSet(aa_set, filepath = "hcol1_seqs.fasta")
 
-all_domains <- read_csv("collagenome_domains_long.csv")
+all_domains <- read_csv("collagenome_stats/collagenome_domains_long.csv")
 all_domains <- all_domains %>%
   filter(hcol_type != "others")
 
@@ -393,7 +395,7 @@ wide_summary <- complete_summary %>%
     values_from = med_prop_pct
   ) %>%
   arrange(collagen_type)
-write_csv(wide_summary, "median_summary.csv")
+write_csv(wide_summary, "collagenome_stats/median_summary.csv")
 
 ft_summary <- flextable(wide_summary) %>%
   theme_zebra() %>%
@@ -418,7 +420,6 @@ all_domain_comparisons <- hcol1_domain_stats %>%
   )
 
 get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
-  library(dplyr)
 
   results <- lapply(domain_list, function(dom) {
     domain_data <- data_df %>% filter(domain_name == dom)
@@ -431,7 +432,14 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
           d1 <- (domain_data %>% filter(class == "Hydrozoans"))$total_domain_length
           d2 <- (domain_data %>% filter(class == other_class))$total_domain_length
 
-          wtest <- wilcox.test(d2, d1, exact = FALSE)
+          wtest <- wilcox.test(d2, d1, exact = FALSE, alternative = "two.sided")
+
+          n1 <- length(d1)
+          n2 <- length(d2)
+          N <- n1 + n2
+
+          z_val <- qnorm(wtest$p.value / 2) * -1
+          r_effect <- z_val / sqrt(N)
 
           med1 <- median(d1, na.rm = TRUE)
           med2 <- median(d2, na.rm = TRUE)
@@ -447,7 +455,15 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
             pct_diff = pct_diff,
             abs_pct = abs(pct_diff),
             p.raw = wtest$p.value,
-            p.adj = wtest$p.value
+            p.adj = wtest$p.value,
+            z_value = z_val,
+            r_effect = r_effect,
+            effect_size_label = case_when(
+              r_effect < 0.1 ~ "negligible",
+              r_effect < 0.3 ~ "small",
+              r_effect < 0.5 ~ "medium",
+              TRUE ~ "large"
+            )
           )
         }
       }) %>% purrr::discard(is.null)
@@ -481,7 +497,9 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
           abs_pct = numeric(),
           p.raw = numeric(),
           p.adj = numeric(),
-          p.signif = character()
+          p.signif = character(),
+          r_effect = numeric(),
+          effect_size_label = character()
         )
       }
     } else {
@@ -496,7 +514,9 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
         abs_pct = numeric(),
         p.raw = numeric(),
         p.adj = numeric(),
-        p.signif = character()
+        p.signif = character(),
+        r_effect = numeric(),
+        effect_size_label = character()
       )
     }
   })
