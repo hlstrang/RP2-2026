@@ -6,10 +6,9 @@ library(statsExpressions)
 library(ggpubr)
 library(pheatmap)
 library(flextable)
-setwd("Documents/year_5/rp2")
 
 ## Statistics
-full_df <- read_csv("collagenome_stats/combined_collagenome.csv")
+full_df <- read_csv("combined_collagenome.csv")
 full_df <- full_df %>%
   mutate(hcol_type = tolower(hcol_type) %>% str_remove(" .*"))
 
@@ -20,7 +19,7 @@ names(hcol1_full_df$sequence) <- hcol1_full_df$species
 aa_set <- AAStringSet(hcol1_full_df$sequence)
 writeXStringSet(aa_set, filepath = "hcol1_seqs.fasta")
 
-all_domains <- read_csv("collagenome_stats/collagenome_domains_long.csv")
+all_domains <- read_csv("collagenome_domains_long.csv")
 all_domains <- all_domains %>%
   filter(hcol_type != "others")
 
@@ -394,7 +393,7 @@ wide_summary <- complete_summary %>%
     values_from = med_prop_pct
   ) %>%
   arrange(collagen_type)
-write_csv(wide_summary, "collagenome_stats/median_summary.csv")
+write_csv(wide_summary, "median_summary.csv")
 
 ft_summary <- flextable(wide_summary) %>%
   theme_zebra() %>%
@@ -533,48 +532,6 @@ abbr_map <- c(
   "Staurozoans" = "Staurozoan"
 )
 
-heatmap_top3 <- sig_vs_hydrozoa %>%
-  arrange(collagen_type, domain, desc(log_p)) %>%
-  group_by(collagen_type, domain) %>%
-  mutate(
-    rank = row_number(),
-    label_line = paste0(
-      abbr_map[compared_class][1],
-      ifelse(pct_diff > 0, "↑", "↓"),
-      abs(round(pct_diff)), "%"
-    )
-  ) %>%
-  summarise(
-    pct_agg = list(pct_diff),
-    log_p_max = max(log_p),
-    label_short = paste0(label_line, collapse = "\n"),
-    pct_vs_hydro = pct_diff[which.max(log_p)],
-    .groups = "drop"
-  )
-
-ggplot(heatmap_top3, aes(x = domain, y = collagen_type, fill = pct_vs_hydro)) +
-  geom_tile(color = "white", linewidth = 0.4) +
-  geom_text(
-    aes(label = label_short),
-    size = 2.5,              
-    lineheight = 0.65,
-    vjust = 0.5,
-    hjust = 0.5) +
-  scale_fill_gradient2(
-    low = "#ff8888", mid = "#ffffff", high = "#88dd88",
-    midpoint = 0, limits = c(-30, 30),
-    oob = scales::squish,
-    name = "% vs\nHydrozoans"
-  ) +
-  labs(
-    x = "Domain", y = "Collagen Type"
-  ) +
-  theme_basic() +
-  theme(
-    legend.position = "right"
-  )
-
-# Keep full data (don't aggregate to single row)
 heatmap_data <- sig_vs_hydrozoa %>%
   mutate(
     short_class = abbr_map[compared_class],

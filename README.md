@@ -26,11 +26,14 @@ Within these, python scripts are used:
 5. sequence_mapping.py
 
 ## Domain Architecture
-The domains were mapped against a cutsom HMM database, with accession numbers shown here. The triple helix regex matching expression was:
+The domains were mapped against a cutsom HMM database, with accession numbers shown [here](src/added_seq_from_wgs/hmm_domain_accessions.md). The triple helix regex matching expression was:
 
     r"(G..){3,}"
 
-Which highlights sequences of a Glycine followed by two other amino acids. To account for small interruptions, a max gap of 9 amino acids was allowed where the triple helix was still combined as one. If there was a gap longer than this threshold, this was counted as two triple helix domains.
+Which highlights sequences of a Glycine followed by two other amino acids. To account for small interruptions, a max gap of 9 amino acids was allowed where the triple helix was still combined as one. If there was a gap longer than this threshold, this was counted as two triple helix domains (sometimes adjusted depending on collagen type).
+
+## Statistical Analysis
+To determine significant variations in median domain lengths, Wilcoxon signed-ranked tests were used with Hydrozoan as the baseline due to its overrepresentation in the dataset. The R script 'statistical_analysis.R' contains individual domain stats for each collagen type including total domains, domain length, and domain proportion. These summaries are combined to conduct the Wilcoxon signed-ranked tests and p-values are adjusted using the Holm method.
 
 ## Phylogenetic Analysis
 Hcol1 sequences were extracted from the collagenome and once the newick file was obtained, the R script 'phylogeny.R' was used to create the tree topology.
