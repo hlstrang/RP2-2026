@@ -1,4 +1,4 @@
-### Supplementary Table S1: Sample sizes of species represented by each class for each collagen type
+### Supplementary Table S2: Sample sizes of species represented by each class for each collagen type
 
 | Collagen Type | Hydrozoa | Scyphozoa | Cubozoa | Staurozoa | Total |
 | :---:  |  :---:    |  :---:      | :---:      | :---:      | :---:      |
