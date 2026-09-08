@@ -6,46 +6,33 @@ library(tidyverse)
 setwd("Documents/year_5/rp2")
 flowchart_tsa <- grViz("
 digraph pipeline {
-
-  # Graph styling
   graph [layout = dot, rankdir = TB, nodesep = 0.5, ranksep = 0.4]
 
-  # Default node formatting (Publication style: clean sans-serif, high contrast)
   node [fontname = 'Arial', fontsize = 10, shape = box, style = 'filled,rounded',
         color = '#1A365D', fillcolor = '#F0F4F8', fontcolor = '#0F172A', penwidth = 1.5]
 
-  # Default edge (arrow) formatting
   edge [color = '#334155', penwidth = 1.2, arrowsize = 0.8]
 
-  # --- NODE DEFINITIONS ---
-
-  # Inputs (Top Level)
   input1 [label = 'Medusozoan TSA Datasets\n(NCBI Database)', fillcolor = '#E2E8F0', fontcolor = '#0F172A']
   input2 [label = 'Reference Hcol Sequences\n(Known Collagenome)', fillcolor = '#E2E8F0', fontcolor = '#0F172A']
 
-  # Core Process Pipeline
   p1 [label = 'Local BLAST Database\nConstruction (makeblastdb)']
   p2 [label = 'Homology Search\n(tblastn)']
   p3 [label = 'Nucleotide Sequence Extraction\n(Contig Retrieval)']
   p4 [label = 'Open Reading Frame Translation\n(Longest ORF)']
   p5 [label = 'Domain Architecture Verification\n& Functional Annotation']
 
-  # Computational Tool / Parameter Annotations (Hexagons/Side Notes)
   t1 [label = 'tblastn flags:\n-seg no\n-soft_masking false', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
   t2 [label = 'Custom Script:\npull_fasta.py', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
   t3 [label = 'Tool:\norfipy\n(-procs 2)', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
   t4 [label = 'Tool:\nInterProScan\n(-dp -goterms -iprlookup)\nSignalP', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
 
-  # --- ALIGNMENT / LAYOUT RANKS ---
   { rank = same; input1; input2 }
   { rank = same; p2; t1 }
   { rank = same; p3; t2 }
   { rank = same; p4; t3 }
   { rank = same; p5; t4 }
 
-  # --- CONNECTIONS (EDGES) ---
-
-  # Main Workflow
   input1 -> p1
   p1 -> p2
   input2 -> p2
@@ -53,7 +40,6 @@ digraph pipeline {
   p3 -> p4
   p4 -> p5
 
-  # Tool Associations (Dashed Side Arrows)
   edge [style = dashed, color = '#D97706', arrowhead = none]
   t1 -> p2
   t2 -> p3
@@ -67,45 +53,33 @@ flowchart_tsa
 flowchart_wgs <- grViz("
 digraph pipeline {
 
-  # Graph styling
   graph [layout = dot, rankdir = TB, nodesep = 0.5, ranksep = 0.4]
 
-  # Default node formatting (Publication style: clean sans-serif, high contrast)
   node [fontname = 'Arial', fontsize = 10, shape = box, style = 'filled,rounded',
         color = '#1A365D', fillcolor = '#F0F4F8', fontcolor = '#0F172A', penwidth = 1.5]
 
-  # Default edge (arrow) formatting
   edge [color = '#334155', penwidth = 1.2, arrowsize = 0.8]
 
-  # --- NODE DEFINITIONS ---
-
-  # Inputs (Top Level)
   input1 [label = 'Medusozoan WGS Datasets\n(NCBI Database)', fillcolor = '#E2E8F0', fontcolor = '#0F172A']
   input2 [label = 'Reference Hcol Sequences\n(Known Collagenome)', fillcolor = '#E2E8F0', fontcolor = '#0F172A']
 
-  # Core Process Pipeline
   p1 [label = 'Local BLAST Database\nConstruction (makeblastdb)']
   p2 [label = 'Homology Search Using N- and C-termini as Queries\n(tblastn)']
   p3 [label = 'Nucleotide Sequence Extraction\n(Contig Retrieval)']
   p4 [label = 'Predicted Protein Sequence']
   p5 [label = 'Domain Architecture Verification\n& Functional Annotation']
 
-  # Computational Tool / Parameter Annotations (Hexagons/Side Notes)
   t1 [label = 'tblastn flags:\n-seg no\n-soft_masking false', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
   t2 [label = 'Custom Script:\ntblastn_analysis.py', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
   t3 [label = 'Tool:\nminiprot\n(--aln, --gff, --trans)', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
   t4 [label = 'Tool:\nHMMER Domains\nSignalP', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
 
-  # --- ALIGNMENT / LAYOUT RANKS ---
   { rank = same; input1; input2 }
   { rank = same; p2; t1 }
   { rank = same; p3; t2 }
   { rank = same; p4; t3 }
   { rank = same; p5; t4 }
 
-  # --- CONNECTIONS (EDGES) ---
-
-  # Main Workflow
   input1 -> p1
   p1 -> p2
   input2 -> p2
@@ -113,7 +87,6 @@ digraph pipeline {
   p3 -> p4
   p4 -> p5
 
-  # Tool Associations (Dashed Side Arrows)
   edge [style = dashed, color = '#D97706', arrowhead = none]
   t1 -> p2
   t2 -> p3
@@ -198,7 +171,6 @@ digraph combined_pipeline {
 
     input_tsa -> p1_tsa
 
-    # INVISIBLE EDGES: tools FIRST pushes them left
     t1_tsa -> p2_tsa [style = invis]
     p1_tsa -> p2_tsa
 
@@ -215,23 +187,19 @@ digraph combined_pipeline {
   title_tsa -> input_tsa [style = invis, weight = 10]
   title_wgs -> input_wgs [style = invis, weight = 10]
 
-  # --- SHARED CONVERGENCE NODE ---
   p_shared [label = 'Domain Architecture Verification\\n& Functional Annotation', fillcolor = '#DBEAFE', penwidth = 2.0]
   t_shared [label = 'Tools:\\nHMMER (Domain Search)\\nSignalP', shape = hexagon, fillcolor = '#FEF3C7', color = '#D97706', fontsize = 8]
 
-  # --- RANKS FOR HORIZONTAL ALIGNMENT ---
   { rank = same; t1_wgs; p2_wgs }
   { rank = same; t2_wgs; p3_wgs }
   { rank = same; t3_wgs; p4_wgs }
   { rank = same; p_shared; t_shared }
 
-  # --- EXTERNAL EDGES ---
   ref_seq -> p2_wgs
   ref_seq -> p2_tsa
   p4_wgs -> p_shared
   p4_tsa -> p_shared
 
-  # --- VISIBLE DASHED ANNOTATION LINES (purely cosmetic, unconstrained) ---
   edge [style = dashed, color = '#D97706', arrowhead = none, constraint = false]
   t1_wgs -> p2_wgs
   t2_wgs -> p3_wgs
