@@ -8,8 +8,8 @@ library(tidytree)
 library(ggforce)
 setwd("Documents/year_5/rp2")
 
-tree <- read.tree("phylogeny/hcol1.nwk")
-tree <- root(tree, outgroup = "Radianthus crispa")
+tree <- read.tree("phylogeny/hcol1_rooted.nwk")
+tree <- root(tree, outgroup = "Radianthus_crispa")
 tipcategories = read.csv("phylogeny/metadata.csv",
                          sep = ",",
                          header = TRUE,
@@ -25,16 +25,16 @@ tipcategories <- tipcategories %>% select(label, everything())
 node_cubo    <- MRCA(tree, tipcategories$label[tipcategories$class == "Cubozoans"])
 node_stauro  <- MRCA(tree, tipcategories$label[tipcategories$class == "Staurozoans"])
 node_hydro   <- MRCA(tree, tipcategories$label[tipcategories$class == "Hydrozoans"])
-node_scypho1 <- 1
+node_scypho <- MRCA(tree, tipcategories$label[tipcategories$class == "Scyphozoans"])
 node_scypho2 <- 41
 node_scypho3 <- 44
 node_scypho4 <- 8
 node_scypho5 <- 2
 
 highlight_df <- data.frame(
-  node = c(node_stauro, node_cubo, node_hydro, node_scypho1, node_scypho2, node_scypho3, node_scypho4, node_scypho5),
-  group = c("Staurozoa", "Cubozoa", "Hydrozoa", "Scyphozoa", "Scyphozoa", "Scyphozoa", "Scyphozoa", "Scyphozoa"),
-  color = c("purple", "red", "olivedrab", "deepskyblue", "deepskyblue", "deepskyblue", "deepskyblue", "deepskyblue")
+  node = c(node_stauro, node_cubo, node_hydro, node_scypho),
+  group = c("Staurozoa", "Cubozoa", "Hydrozoa", "Scyphozoa"),
+  color = c("purple", "red", "olivedrab", "deepskyblue")
 )
 
 color_palette <- setNames(
