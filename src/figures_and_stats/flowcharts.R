@@ -235,7 +235,7 @@ collagen_data <- data.frame(
     "Col1 and Col2 present",
     "Col1 length = ~1000 aa with several short interruptions; No Col2; Longer gap between SP and Col1"
   ),
-  `C-terminus` = c("COLF1", "COLF1", "COLF1", "C4", "COLF1", "C4", "COLF1", "COLF1"),
+  `C-terminus` = c("COLFI", "COLFI", "COLFI", "C4", "COLFI", "C4", "COLFI", "COLFI"),
   stringsAsFactors = FALSE
 )
 colnames(collagen_data) <- c("Collagen Type", "Non-collagenous Domains", "Triple Helix Structure", "C-terminus")

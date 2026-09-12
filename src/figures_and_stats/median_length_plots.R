@@ -8,13 +8,17 @@ df <- read_csv("collagenome_stats/collagenome_stats.csv")
 df <- df %>%
   filter(hcol_type != "others")
 
-domain_colors <- read_csv("written_report/vulgaris_all_domains.csv") %>%
+domain_colours <- read_csv("written_report/vulgaris_all_domains.csv") %>%
   distinct(domain_name, colour) %>%
   pull(colour, name = domain_name)
-domain_names_cleaned <- tolower(names(domain_colors))
-names(domain_colors) <- domain_names_cleaned
-domain_colors$col1 <- "forestgreen"
-domain_colors$col2 <- "#8FD6A5"
+names(domain_colours) <- domain_names_cleaned
+domain_colours$col1 <- "forestgreen"
+domain_colours$col2 <- "#8FD6A5"
+
+colour_df <- tibble(
+  domain = names(domain_colours),
+  colour = unname(domain_colours)
+)
 
 ## Median Lengths
 structure_median <- df %>%
@@ -39,25 +43,44 @@ structure_median <- df %>%
         "wap",
         "col1",
         "col2",
-        "colf1",
+        "colfi",
         "c4"
       )
     )
   )
 
-ggplot(structure_median, aes(y = hcol_type, x = length, fill = region)) +
+mapping <- c(
+  "sp" = "SP",
+  "tspn" = "TSPN",
+  "vwa" = "VWA",
+  "wap" = "WAP",
+  "col1" = "Col1",
+  "col2" = "Col2",
+  "colfi" = "COLFI",
+  "c4" = "C4"
+)
+
+domain_colours <- colour_df %>%
+  mutate(domain_cleaned = mapping[domain])
+
+structure_median <- structure_median %>%
+  mutate(domain_clean = factor(
+    mapping[region],
+    levels = c("SP", "TSPN", "VWA", "WAP", "Col1", "Col2", "COLFI", "C4")
+  ))
+
+ggplot(structure_median, aes(y = hcol_type, x = length, fill = domain_clean)) +
   geom_col(position = position_stack(reverse = TRUE), width = 0.7) +
   facet_grid(species_class ~ ., scales = "free_y", space = "free_y") +
   theme_basic() +
   scale_fill_manual(
-    values = domain_colors,
+    values = setNames(domain_colours$colour, domain_colours$domain_cleaned),
     guide = guide_legend(reverse = TRUE)
   ) +
   labs(
-    title = "Domain Architecture",
-    x = "Median Domain Instance Length (Amino Acids)",
+    x = "Median Domain Length (Amino Acids)",
     y = "Collagen Type",
-    fill = "Domain Type"
+    fill = "Domain Name"
   ) +
   theme(
     strip.text.y = element_text(angle = 0, face = "bold"),
