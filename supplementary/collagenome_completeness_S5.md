@@ -1,4 +1,4 @@
-### Supplementary Table S: Number of collagen types identified in each species and completeness
+### Supplementary Table S6: Number of collagen types identified in each species and completeness
 Species marked with * also contain a Hcol2b paralog
 
 | Species                       | Class       |   Number of Collagen Types Identified | Collagen Types Present                                          |   Completeness (%) |

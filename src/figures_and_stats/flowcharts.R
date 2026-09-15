@@ -248,4 +248,77 @@ ft_table <- flextable(collagen_data) %>%
   theme_zebra()
 ft_table
 
+hydrozoa <- final_collagenome %>%
+  filter(class == "Hydrozoans") %>%
+  filter(hcol_type != "Other") %>%
+  group_by(species) %>%
+  summarise(n_types = n_distinct(hcol_type)) %>%
+  count(n_types, name = "species_count") %>%
+  arrange(desc(n_types))
 
+scyphozoa <- final_collagenome %>%
+  filter(class == "Scyphozoans") %>%
+  filter(hcol_type != "Other") %>%
+  group_by(species) %>%
+  summarise(n_types = n_distinct(hcol_type)) %>%
+  count(n_types, name = "species_count") %>%
+  arrange(desc(n_types))
+
+cubozoa <- final_collagenome %>%
+  filter(class == "Cubozoans") %>%
+  filter(hcol_type != "Other") %>%
+  group_by(species) %>%
+  summarise(n_types = n_distinct(hcol_type)) %>%
+  count(n_types, name = "species_count") %>%
+  arrange(desc(n_types))
+
+staurozoa <- final_collagenome %>%
+  filter(class == "Staurozoans") %>%
+  filter(hcol_type != "Other") %>%
+  group_by(species) %>%
+  summarise(n_types = n_distinct(hcol_type)) %>%
+  count(n_types, name = "species_count") %>%
+  arrange(desc(n_types))
+
+unclassified <- final_collagenome %>%
+  filter(hcol_type == "Other") %>%
+  group_by(class) %>%
+  summarise(count = n())
+
+assembly <- data.frame(
+  `Number of Collagen Types Identified` = c("Hcol1", "Hcol2a","Hcol3","Hcol4","Hcol5","Hcol6",,8,9,"Unclassified"),
+  `Hydrozoa` = c(3, 0, 1, 0, 0, 4, 3, 7, 4, 14),
+  `Scyphozoa` = c(0,0,0,0,0,0,0,0,8,2),
+  `Cubozoa` = c(0,0,0,0,0,0,6,0,0,2),
+  `Staurozoa` = c(0,0,1,1,1,1,1,0,0,5),
+  stringsAsFactors = FALSE
+)
+colnames(assembly) <- c("No. of Collagen Types Identified", "Hydrozoa", "Scyphozoa", "Cubozoa", "Staurozoa")
+
+ft_table <- flextable(assembly) %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  theme_zebra()
+ft_table
+
+collagen_summary <- final_collagenome %>%
+  filter(hcol_type != "Other") %>%
+  filter(hcol_type != "Hcol2b") %>%
+  mutate(hcol_type = str_replace(hcol_type, "Hcol2a", "Hcol2")) %>%
+  group_by(species, class) %>%
+  summarise(
+    n_types = n_distinct(hcol_type),
+    types_present = paste(sort(unique(hcol_type)), collapse = ", "),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    completeness = round(100 * n_types / 8, 1))
+median(collagen_summary$completeness)
+median(collagen_summary$n_types)
+collagen_summary %>% group_by(n_types) %>% summarise(count = n())
+write_csv(collagen_summary, "completeness.csv")
+ft_table <- flextable(collagen_summary) %>%
+  align(align = "center", part = "all") %>%
+  autofit() %>%
+  theme_zebra()
+ft_table

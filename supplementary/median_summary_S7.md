@@ -1,4 +1,4 @@
-## Supplementary Table S6: Table of median domain proportions across all classes in each collagen type
+## Supplementary Table S7: Table of median domain proportions across all classes in each collagen type
 
 | Collagen Type   |   Median Length (aa) | COLFI   | Col1   | Col2   | Signal Peptide   | WAP   | VWA    | C4     | TSPN   |
 |:----------------|-----------------:|:--------|:-------|:-------|:-----------------|:------|:-------|:-------|:-------|
