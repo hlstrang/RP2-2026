@@ -7,7 +7,6 @@ library(ggpubr)
 library(pheatmap)
 library(flextable)
 library(rstatix)
-setwd("Documents/year_5/rp2")
 
 ## Statistics
 full_df <- read_csv("collagenome_stats/combined_collagenome.csv")
@@ -527,7 +526,7 @@ get_pairwise_vs_hydrozoa <- function(data_df, collagen_type, domain_list) {
 
 all_vs_hydrozoa <- bind_rows(
   get_pairwise_vs_hydrozoa(hcol1_domain_stats, "Hcol1", c("Col1", "Col2", "COLFI", "Signal_Peptide")),
-  get_pairwise_vs_hydrozoa(hcol2_domain_stats, "Hcol2", c("Col1", "Col2", "COLFI", "WAP")),
+  get_pairwise_vs_hydrozoa(hcol2_domain_stats, "Hcol2", c("Col1", "Col2", "COLFI", "WAP", "Signal_Peptide")),
   get_pairwise_vs_hydrozoa(hcol3_domain_stats, "Hcol3", c("Col1", "Col2", "COLFI", "Signal_Peptide", "WAP")),
   get_pairwise_vs_hydrozoa(hcol4_domain_stats, "Hcol4", c("Col1", "Col2", "C4", "Signal_Peptide")),
   get_pairwise_vs_hydrozoa(hcol5_domain_stats, "Hcol5", c("Col1", "Col2", "COLFI", "Signal_Peptide")),
@@ -595,4 +594,3 @@ final_fig <- ggplot(heatmap_data, aes(x = domain, y = collagen_type, fill = pct_
     label.position = "right"
   ))
 final_fig
-
